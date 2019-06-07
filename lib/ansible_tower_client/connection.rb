@@ -18,6 +18,7 @@ module AnsibleTowerClient
       @connection = Faraday.new(options[:base_url]) do |conn|
         conn.request :oauth2, options[:api_token], token_type: :bearer
         conn.adapter Faraday.default_adapter
+        conn.headers['Content-Type'] = 'application/json'
       end
     end
 
