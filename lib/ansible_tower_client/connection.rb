@@ -5,7 +5,7 @@ module AnsibleTowerClient
     attr_reader :connection
 
     def initialize(options = nil)
-      raise "Credentials are required" unless options[:username] && options[:password]
+      raise ":api_token is required" unless options[:api_token]  
       raise ":base_url is required" unless options[:base_url]
       logger     = options[:logger] || AnsibleTowerClient.logger
       verify_ssl = options[:verify_ssl] || OpenSSL::SSL::VERIFY_PEER
@@ -14,15 +14,10 @@ module AnsibleTowerClient
       require 'faraday'
       require 'faraday_middleware'
       require 'ansible_tower_client/middleware/raise_tower_error'
-      Faraday::Response.register_middleware :raise_tower_error => -> { Middleware::RaiseTowerError }
-      @connection = Faraday.new(options[:base_url], :ssl => {:verify => verify_ssl}) do |f|
-        f.use(FaradayMiddleware::EncodeJson)
-        f.use(FaradayMiddleware::FollowRedirects, :limit => 3, :standards_compliant => true)
-        f.request(:url_encoded)
-        f.response(:raise_tower_error)
-        f.response(:logger, logger)
-        f.adapter(Faraday.default_adapter)
-        f.basic_auth(options[:username], options[:password])
+      Faraday::Response.register_middleware :raise_tower_error => -> { Middleware::RaiseTowerError } 
+      @connection = Faraday.new(options[:base_url]) do |conn|
+        conn.request :oauth2, options[:api_token], token_type: :bearer
+        conn.adapter Faraday.default_adapter
       end
     end
 

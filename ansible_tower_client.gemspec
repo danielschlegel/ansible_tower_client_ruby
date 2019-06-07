@@ -23,5 +23,6 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "factory_bot", "~> 4.11"
   spec.add_development_dependency "rake", "~> 12.3"
+  spec.add_development_dependency "faraday_middleware"
   spec.add_development_dependency "rspec"
 end
